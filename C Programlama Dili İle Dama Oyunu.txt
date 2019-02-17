@@ -1,0 +1,178 @@
+// Dama.cpp : Defines the entry point for the console application.
+//
+
+#include "stdafx.h"
+#include <stdlib.h>
+
+#define col 8
+#define row 8
+
+char tahta[8][8];
+
+void BeyazTasDoldur(){
+	int i, j;
+	for (i = 1; i < 3; i++){
+		for (j = 0; j < row; j++){
+			tahta[i][j] = 'O';
+		}
+	}
+}
+
+void SiyahTasDoldur(){
+	int i, j;
+	for (i = 5; i < 7; i++){
+		for (j = 0; j < row; j++){
+			tahta[i][j] = 'X';
+		}
+	}
+}
+
+void TahtayiYazdir(){
+	system("cls");
+	printf("  1 2 3 4 5 6 7 8\n");
+
+	int i, j;
+	for (i = 0; i < col; i++){
+		printf("%d ", i + 1);
+
+
+		for (j = 0; j < row; j++){
+			if (tahta[i][j] == 'O' || tahta[i][j] == 'X')
+				printf("%c ", tahta[i][j]);
+			else
+				printf("- ");
+		}
+		printf("\n");
+	}
+}
+
+void OyunuBaslat(){
+	BeyazTasDoldur();
+	SiyahTasDoldur();
+	TahtayiYazdir();
+}
+
+int Hamle = 0;
+int nerdenCol, nerdenRow;
+int nereyeCol, nereyeRow;
+char chr;
+char zitChr;
+int Xskor = 0;
+int Oskor = 0;
+
+void TasDegis(){
+	tahta[nerdenRow][nerdenCol] = '-';
+	tahta[nereyeRow][nereyeCol] = chr;
+}
+
+void SkorHesapla(){
+	Hamle % 2 == 0 ? Xskor++ : Oskor++;
+}
+
+bool HamleKontrol(){
+	if (nerdenCol != nereyeCol && nerdenRow != nereyeRow){ // ÇAPRAZ GÝTMESÝN
+		return false;
+	}
+
+	if (!(abs(nerdenCol - nereyeCol) >= 0 && abs(nerdenCol - nereyeCol) <= 1)){ // Yatay Kontrolü
+		if (nerdenCol - nereyeCol == 2 && tahta[nerdenRow][nerdenCol - 1] == zitChr){ // sol yatay
+			tahta[nerdenRow][nerdenCol - 1] = '-';
+			SkorHesapla();
+		}
+		else if (nereyeCol - nerdenCol == 2 && tahta[nerdenRow][nerdenCol + 1] == zitChr){
+			tahta[nerdenRow][nerdenCol + 1] = '-';
+			SkorHesapla();
+		}
+		else{
+			return false;
+		}
+	}
+
+	if (chr == 'X'){
+		if (!(nerdenRow >= nereyeRow && nerdenRow - nereyeRow <= 1)){
+			if (nerdenRow - nereyeRow == 2 && tahta[nerdenRow - 1][nerdenCol] == zitChr){
+				tahta[nerdenRow - 1][nerdenCol] = '-';
+				SkorHesapla();
+			}
+			else{
+				return false;
+			}
+		}
+	}
+	else if (chr == 'O'){
+		if (!(nereyeRow >= nerdenRow && nereyeRow - nerdenRow <= 1)){
+			if (nereyeRow - nerdenRow == 2 && tahta[nerdenRow + 1][nerdenCol] == zitChr){
+				tahta[nerdenRow + 1][nerdenCol] = '-';
+				SkorHesapla();
+			}
+			else{
+				return false;
+			}
+		}
+	}
+
+	if (!(tahta[nerdenRow][nerdenCol] == chr)){ // Oynanacak taþ varsa
+		return false;
+	}
+
+	if (!(tahta[nereyeRow][nereyeCol] != 'X' && tahta[nereyeRow][nereyeCol] != 'O')){ // Gidilecek yerde taþ yoksa
+		return false;
+	}
+
+	return true;
+}
+
+bool OyunKontrol(){
+	if (Xskor == 16)
+		printf("\nX KAZANDI...\n");
+	else if (Oskor)
+		printf("\nO KAZANDI...\n");
+
+	return Xskor == 16 || Oskor == 16;
+}
+
+int _tmain(int argc, _TCHAR* argv[])
+{
+
+
+
+	OyunuBaslat();
+
+	do
+	{
+		chr = Hamle % 2 == 0 ? 'X' : 'O';
+		zitChr = Hamle + 1 % 2 == 0 ? 'X' : 'O';
+
+		printf("Oynama sirasi : %c\n", chr);
+
+	birdahaDene:
+		printf("--NERDEN--\n");
+		printf("Satir : "); scanf("%d", &nerdenRow);
+		printf("Sutun : "); scanf("%d", &nerdenCol);
+
+		printf("--NEREYE--\n");
+		printf("Satir : "); scanf("%d", &nereyeRow);
+		printf("Sutun : "); scanf("%d", &nereyeCol);
+
+		// INDÝS KONTROL
+		nerdenRow--;
+		nerdenCol--;
+		nereyeRow--;
+		nereyeCol--;
+
+		if (!HamleKontrol()){
+			printf("YANLIS HAMLE\n");
+			goto birdahaDene;
+		}
+
+		TasDegis();
+
+		Hamle++;		
+
+		TahtayiYazdir();
+	} while (OyunKontrol);
+
+	system("PAUSE");
+	return 0;
+}
+
